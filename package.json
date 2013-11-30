@@ -1,0 +1,49 @@
+{
+  "name": "mathnum-newton",
+  "description": "Another mathnum package",
+  "version": "0.0.1",
+  "homepage": "https://github.com/jostylr/mathnum-newton",
+  "author": {
+    "name": "James Taylor",
+    "email": "jostylr@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jostylr/mathnum-newton.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jostylr/mathnum-newton/issues"
+  },
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/jostylr/mathnum-newton/blob/master/LICENSE-MIT"
+    }
+  ],
+  "main": "index.js",
+  "engines": {
+    "node": ">10.0"
+  },
+  "devDependencies" : {
+    "literate-programming" : "~0.7.5",
+    "tape" : "=2.3.0",
+    "browserify" : "=2.35.4"
+  },
+  "peerDependencies":{  
+    "math-numbers" : ">=0.0.5"
+  },
+  "scripts" : { 
+    "test" : "node ./test/testrunner.js | grep -v -e ^ok",
+    "install": "node install.js"
+  },
+  "private" : true, 
+  "testling": {
+        "files": "test/*.js",
+        "browsers": {
+          "ie": [ 9, 10 ],
+          "firefox": [ 25, "nightly" ],
+          "chrome": [ 31, "canary" ],
+          "safari": [ 5.1]
+        }
+    }
+}
