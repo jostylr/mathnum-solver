@@ -4,7 +4,9 @@ This is for basic project files such as README, npm management, etc. plus Newton
 
 ## Files
 
-* [ghpages/index.html](#main "save:")
+* [install.js](#main "save: | jshint")
+* [ghpages/index.html](#homepage "save:")
+* [index.js](#newton "save: | jshint")
 * [README.md](#readme "save:| clean raw") The standard README.
 * [package.json](#npm-package "save: json  | jshint") The requisite package file for a npm project. 
 * [TODO.md](#todo "save: | clean raw") A list of growing and shrinking items todo.
@@ -14,7 +16,74 @@ This is for basic project files such as README, npm management, etc. plus Newton
 * [.npmignore](#npmignore "Save:") A .npmignore file
 
 
-## main
+## Main
+
+So this is the actual file for the export of the Newton method and methods.
+
+    var exports = module.exports;
+
+    var Finder = module.Finder = function (options) {
+        var self = this;
+        var precision = options.precision || -25;
+        var maxIterations = options.maxIterations || 10;
+        var guess = function () 
+
+        self.newton = _"newton";
+
+        self.sqrt = _"sqrt";
+
+        self.root = _"root";
+
+        return this;
+
+    }
+
+
+    var f = new Finder({
+
+    });
+
+    module.exports = f;
+
+## Newton
+
+This is the calculus Newton's method. It takes in a function, its derivative, starting value, precision, max iterations, bounds.  Not all are necessary. 
+
+f is function, fd is derivative, start 
+
+Newton's formula is `next = current - f(current)/f'(current)` coming from `f'(current) ~~ [f(current) - f(root)]/(current - root)`. Sovle for root and we assume f(root) is zero. 
+
+The precision is guessed to be the distance of current and next. 
+
+    function (f, fd, start, options) {
+
+        ret = {guesses : [],
+            f : [],
+            fd : []
+        }
+
+
+
+        for ( i = 0; i < n; i += 1 ) {
+
+            der = fd(current);
+            ret.fd.push(der);
+            if ( fd.current.noReciprocal() ) {
+                return {status: "failed", ;
+            }
+            next = current.sub( f(current).div(der) );
+
+            if (
+
+        }
+
+    }
+
+## Secant
+
+## Close Secant
+
+## homepage
 
 This is the main welcome page for math pebbles
 
@@ -37,8 +106,11 @@ This is the main welcome page for math pebbles
 
 ## README
 
- # Whatever you like  
+ # Newton's Method
 
+This is a plugin to Math-Numbers that implements Newton's method and related algorithms.
+
+To use, ??
 
 ## TODO
 
