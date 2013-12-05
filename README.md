@@ -15,9 +15,9 @@ Amont the options is the comparator function. It should take in two values and g
 
 This is a plugin to Math-Numbers that implements Newton's method and related algorithms:
 
-* newton(f, options) This does the classic Newton
-* numNewton(f, options)  This does a numerical derivative (evaluates f twice near the guess)
-* secant(f, options) This uses the previous guess and current to get the slope to use.
+* newton(f, start, options) This does the classic Newton's method starting with start.
+* numNewton(f, start, options)  This does a numerical derivative (evaluates f twice near the guess)
+* secant(f, start1, start2, options) This uses the previous guess and current to get the slope to use.
 * sqrt(target, options) This computes square roots by the Babylonian method, averaging the guess and target/guess together.
 * root(target, options) This can deal with arbitrary n-th root (integer) 
 * pow(n, options)  This deals with raising the function to any rational power using these techniques. Probably horrendously slow compared with log/exp

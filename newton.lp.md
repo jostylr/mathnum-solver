@@ -1,6 +1,11 @@
 # Newton, etc.
 
-This is the literate program part for doing Newtonesque algorithms. 
+This is the literate program part for doing Newtonesque algorithms.
+
+## Files
+
+*[examples/newton.js](#newton "save: examples|jshint")
+
 
 ## Export
 
@@ -18,9 +23,9 @@ self.root = _"root";
 
     This is a plugin to Math-Numbers that implements Newton's method and related algorithms:
 
-    * newton(f, options) This does the classic Newton
-    * numNewton(f, options)  This does a numerical derivative (evaluates f twice near the guess)
-    * secant(f, options) This uses the previous guess and current to get the slope to use.
+    * newton(f, start, options) This does the classic Newton's method starting with start.
+    * numNewton(f, start, options)  This does a numerical derivative (evaluates f twice near the guess)
+    * secant(f, start1, start2, options) This uses the previous guess and current to get the slope to use.
     * sqrt(target, options) This computes square roots by the Babylonian method, averaging the guess and target/guess together.
     * root(target, options) This can deal with arbitrary n-th root (integer) 
     * pow(n, options)  This deals with raising the function to any rational power using these techniques. Probably horrendously slow compared with log/exp
@@ -38,29 +43,91 @@ Newton's formula is `next = current - f(current)/f'(current)` coming from `f'(cu
 
 The precision is guessed to be the distance of current and next. 
 
-    function (f, fd, start, options) {
+To use this method, functions should have a method that generates a derivative. 
 
-        ret = {guesses : [],
-            f : [],
-            fd : []
-        }
+    function (f, start, options) {
 
-
+        _":setup"
 
         for ( i = 0; i < n; i += 1 ) {
+            ret.guesses.push(current);
+
+            fval = f(current);
+            ret.f.push(fval);
 
             der = fd(current);
             ret.fd.push(der);
-            if ( fd.current.noReciprocal() ) {
-                return {status: "failed", ;
+
+            if ( der.eq(der.zero()) ) {  //noReciprocal() ) {
+                ret.status = "horizontal tangent line";
+                return ret;
             }
-            next = current.sub( f(current).div(der) );
 
-            if (
+            next = current.sub( fval.div(der) );
 
+            if ( current.sub(next).abs().mlt(precision)) { // current.distance(next) < precision) {
+                console.log(current.sub(next).abs().sci().str("dec:50"));
+                ret.status = "found within tolerance";
+                console.log(next.str("dec:100"));
+                ret.answer = next;
+                return ret;
+            }
+            current = next;
         }
 
+        ret.status = "max iterations exceeded";
+        ret.next = next;
+        return ret;
     }
+
+[setup]()
+
+    options = options || {};
+
+    console.log(options.precision);
+
+    var fval, der, next, i,
+        current = start,
+        precision = Num.int(10).ipow(options.precision || self.precision),
+        n = options.maxIterations || self.maxIterations,
+        fd = f.derivative(),
+        ret = {guesses : [],
+            f : [],
+            fd : []
+        };
+
+
+
+[examples](# "js")
+
+We want to have a couple of test examples. This will be fairly basic and boring so as not to rely on the other function libraries.
+
+    /*global require, console*/
+
+    var Num = require('math-numbers');
+    var int = Num.int;
+    var Finder = require('../index.js');
+    var newton = new Finder().newton;
+    var f = function (x) {
+        return x.mul(x).sub(int(2));
+    };
+    f.derivative = function () {
+        return function (x) {
+            return int(2).mul(x);
+        };
+    };
+    var one = newton(f, Num.rat("1 5/6"), {maxIterations:20, precision: -140});
+
+
+    one.guesses.forEach(function (el) {
+        console.log(el.str("dec:100"));
+    });
+
+[tests](# "js")
+
+    
+
+
 
 ## Secant
 

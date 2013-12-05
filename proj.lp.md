@@ -11,7 +11,7 @@ Loading:
 
 Saving: 
 
-* [install.js](#main "save: | jshint")
+* [install.js](#install "save: | jshint")
 * [ghpages/index.html](#homepage "save:")
 * [index.js](#main "save: | jshint")
 * [README.md](#readme "save:") The standard README.
@@ -27,12 +27,19 @@ Saving:
 
 So this is the actual file for the export of the Newton method and methods.
 
-    var exports = module.exports;
 
-    var Finder = module.Finder = function (options) {
+    var Num = require('math-numbers');
+
+    var Finder = function (options) {
+        options = options || {};
         var self = this;
-        var precision = options.precision || -25;
-        var maxIterations = options.maxIterations || 10;
+
+        if (options.precision) {
+            self.precision = options.precision;
+        }
+        if (options.maxIterations) {
+            self.precision = options.maxIterations;
+        }
 
         _"newton::export"
 
@@ -40,12 +47,11 @@ So this is the actual file for the export of the Newton method and methods.
 
     }
 
+    Finder.prototype.precision = -25;
+    Finder.prototype.maxIterations = 10;
 
-    var f = new Finder({
 
-    });
-
-    module.exports = f;
+    module.exports = Finder;
 
 
 ## homepage
@@ -142,10 +148,11 @@ The requisite npm package file. Use `npm run-script compile` to compile the lite
       "devDependencies" : {
         "literate-programming" : "~0.7.5",
         "tape" : "=2.3.0",
-        "browserify" : "=2.35.4"
+        "browserify" : "=2.35.4",
+        "math-numbers" : ">=0.0.6"
       },
       "peerDependencies":{  
-        "math-numbers" : ">=0.0.5"
+        "math-numbers" : ">=0.0.6"
       },
       "scripts" : { 
         "test" : "node ./test/testrunner.js | grep -v -e ^ok",

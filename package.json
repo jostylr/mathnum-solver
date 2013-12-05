@@ -27,10 +27,11 @@
   "devDependencies" : {
     "literate-programming" : "~0.7.5",
     "tape" : "=2.3.0",
-    "browserify" : "=2.35.4"
+    "browserify" : "=2.35.4",
+    "math-numbers" : ">=0.0.6"
   },
   "peerDependencies":{  
-    "math-numbers" : ">=0.0.5"
+    "math-numbers" : ">=0.0.6"
   },
   "scripts" : { 
     "test" : "node ./test/testrunner.js | grep -v -e ^ok",
