@@ -1,6 +1,10 @@
 # [mathnum-solver](# "version: 0.0.1 | jostylr")
 
-This is for basic project files such as README, npm management, etc. plus Newton itself
+This is for basic project files such as README, npm management, etc.
+
+The idea for algorithms is to have a set of functions that do the next step and then maybe a wrapping around that for a typical case. But the idea is to allow for various ways to interact with the algorithm, such as recording each step, showing progress, deciding what conditions lead to stopping, monitor length of time of a step to switch formats, etc. 
+
+Each of the different steps should try to produce as much of the same output as possible to facilitate have the same scaffolding for the different algorithms. In fact, we can have a factory setup to produce the "next step" of the alogrithm fixing the various bits that are not going to change. 
 
 ## Files
 
@@ -29,16 +33,14 @@ So this is the actual file for the export of the Newton method and methods.
 
 
     var Num = require('math-numbers');
+    var EventWhen = require('event-when');
 
     var Finder = function (options) {
         options = options || {};
         var self = this;
 
-        if (options.precision) {
-            self.precision = options.precision;
-        }
-        if (options.maxIterations) {
-            self.precision = options.maxIterations;
+        for (option in options) {
+            self[option] = options[option];
         }
 
         _"newton::export"
@@ -49,7 +51,7 @@ So this is the actual file for the export of the Newton method and methods.
 
     Finder.prototype.precision = -25;
     Finder.prototype.maxIterations = 10;
-
+    Finder.prototype.evw = new EventWhen();
 
     module.exports = Finder;
 
@@ -149,11 +151,14 @@ The requisite npm package file. Use `npm run-script compile` to compile the lite
         "literate-programming" : "~0.7.5",
         "tape" : "=2.3.0",
         "browserify" : "=2.35.4",
-        "math-numbers" : ">=0.0.6"
+        "math-numbers" : ">=0.0.7"
       },
       "peerDependencies":{  
-        "math-numbers" : ">=0.0.6"
+        "math-numbers" : ">=0.0.7"
       },
+      "dependencies" : {
+        "event-when" : "~0.5.1"
+      }
       "scripts" : { 
         "test" : "node ./test/testrunner.js | grep -v -e ^ok",
         "install": "node install.js"

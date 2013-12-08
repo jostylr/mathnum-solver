@@ -32,18 +32,9 @@ self.root = _"root";
 
     The options 
 
+## Algorithm scaffolding
 
-## Newton
-
-This is the calculus Newton's method. It takes in a function, its derivative, starting value, precision, max iterations, bounds.  Not all are necessary. 
-
-f is function, fd is derivative, start 
-
-Newton's formula is `next = current - f(current)/f'(current)` coming from `f'(current) ~~ [f(current) - f(root)]/(current - root)`. Sovle for root and we assume f(root) is zero. 
-
-The precision is guessed to be the distance of current and next. 
-
-To use this method, functions should have a method that generates a derivative. 
+This is the loop part of the algorithms. 
 
     function (f, start, options) {
 
@@ -80,6 +71,47 @@ To use this method, functions should have a method that generates a derivative.
         return ret;
     }
 
+
+## Newton
+
+This is the calculus Newton's method. It takes in a function, its derivative to deliver a "next step" function. Each step requires a value (current guess). 
+
+f is function, fd is derivative, start 
+
+Newton's formula is `next = current - f(current)/f'(current)` coming from `f'(current) ~~ [f(current) - f(root)]/(current - root)`. Sovle for root and we assume f(root) is zero. 
+
+The precision is guessed to be the distance of current and next. 
+
+To use this method, functions should have a method that generates a derivative. 
+
+
+    function (f, fd) {
+        return function (cur) {
+            fval = f(current);
+            ret.f.push(fval);
+
+            der = fd(current);
+            ret.fd.push(der);
+
+            if ( der.eq(der.zero()) ) {  //noReciprocal() ) {
+                ret.status = "horizontal tangent line";
+                return ret;
+            }
+
+            next = current.sub( fval.div(der) );
+
+            if ( current.sub(next).abs().mlt(precision)) { // current.distance(next) < precision) {
+                console.log(current.sub(next).abs().sci().str("dec:50"));
+                ret.status = "found within tolerance";
+                console.log(next.str("dec:100"));
+                ret.answer = next;
+                return ret;
+            }
+            current = next;
+        }
+    }
+
+    
 [setup]()
 
     options = options || {};
@@ -116,7 +148,7 @@ We want to have a couple of test examples. This will be fairly basic and boring 
             return int(2).mul(x);
         };
     };
-    var one = newton(f, Num.rat("1 5/6"), {maxIterations:20, precision: -140});
+    var one = newton(f, Num.rat("1 5/6"), {maxIterations:20, precision: -60});
 
 
     one.guesses.forEach(function (el) {
