@@ -3,17 +3,29 @@
 var Num = require('math-numbers');
 var int = Num.int;
 var Finder = require('../index.js');
-var newton = new Finder().newton;
+var solver = new Finder();
+var algo = solver.rootAlgo();
+var algo2 = solver.rootAlgo({maxIterations:20, precision: -60});
+
 var f = function (x) {
     return x.mul(x).sub(int(2));
 };
-f.derivative = function () {
-    return function (x) {
+var derivative = function (x) {
         return int(2).mul(x);
-    };
 };
-var one = newton(f, Num.rat("1 5/6"), {maxIterations:20, precision: -140});
 
-one.guesses.forEach(function (el) {
-    console.log(el.str("dec:100"));
+var sqnewton = solver.newton(f, derivative);
+
+var one = algo2(sqnewton,  Num.rat("10 5/6") );
+
+one.forEach(function (el) {
+    var key, temp;
+    for (key in el) {
+        temp = el[key];
+        if (temp instanceof Num) {
+            console.log(key, temp.str("dec:100") ) ;
+        } else {
+            console.log(key, temp);
+        }
+    }
 });

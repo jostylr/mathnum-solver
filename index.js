@@ -3,60 +3,73 @@ var Num = require('math-numbers');
 var Finder = function (options) {
     options = options || {};
     var self = this;
+    var option;
 
-    if (options.precision) {
-        self.precision = options.precision;
-    }
-    if (options.maxIterations) {
-        self.precision = options.maxIterations;
+    for (option in options) {
+        self[option] = options[option];
     }
 
-    self.newton = function (f, start, options) {
+    self.rootAlgo = function (options) {
     
         options = options || {};
-        
-        console.log(options.precision);
-        
-        var fval, der, next, i,
-            current = start,
-            precision = Num.int(10).ipow(options.precision || self.precision),
-            n = options.maxIterations || self.maxIterations,
-            fd = f.derivative(),
-            ret = {guesses : [],
-                f : [],
-                fd : []
-            };
     
-        for ( i = 0; i < n; i += 1 ) {
-            ret.guesses.push(current);
+        var precision = Num.int(10).ipow(options.precision || self.precision),
+            max = options.maxIterations || self.maxIterations;
+            time = options.time || self.time;
     
-            fval = f(current);
-            ret.f.push(fval);
+        return function (step, start) {
+            var current = start, res, temp,
+                t,
+                ret = [];
     
-            der = fd(current);
-            ret.fd.push(der);
+            while (1) {
     
-            if ( der.eq(der.zero()) ) {  //noReciprocal() ) {
-                ret.status = "horizontal tangent line";
-                return ret;
+                t = process.hrtime();
+                res = step(current);
+                temp = res.time = process.hrtime(t); 
+                ret.push(res);
+                if  ( (temp[0] > time[0]) || ( (temp[0] === time[0] ) && ( temp[1] > time[1] )  ) ) {
+                    res.error = "time per step exceeded";
+                    break;
+                }
+                if ( res.precision.mlt(precision) ) {
+                    break;
+                }
+    
+                if ( ret.length >= max ) {
+                    res.error = "number of steps exceeded";
+                    break;
+                }
+                current = res.next;
+    
             }
     
-            next = current.sub( fval.div(der) );
-    
-            if ( current.sub(next).abs().mlt(precision)) { // current.distance(next) < precision) {
-                console.log(current.sub(next).abs().sci().str("dec:50"));
-                ret.status = "found within tolerance";
-                console.log(next.str("dec:100"));
-                ret.answer = next;
-                return ret;
-            }
-            current = next;
-        }
-    
-        ret.status = "max iterations exceeded";
-        ret.next = next;
-        return ret;
+            return ret;
+        };
     };
+    
+    self.newton = function (f, fd) {
+            return function (cur) {
+                var fval, der, next;
+        
+                fval = f(cur);
+                der = fd(cur);
+                
+        
+                if ( der.eq(der.zero()) ) {  //noReciprocal() ) {
+                    next = Num.float(Infinity);
+                } else {
+                    next = cur.sub( fval.div(der) );
+                }
+        
+                return {
+                    next : next,
+                    f : fval,
+                    fd : der,
+                    precision : cur.sub(next).abs()
+                };
+            }
+        };
 
     return this;
 
@@ -64,5 +77,6 @@ var Finder = function (options) {
 
 Finder.prototype.precision = -25;
 Finder.prototype.maxIterations = 10;
+Finder.prototype.time = [1,0];
 
 module.exports = Finder;

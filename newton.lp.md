@@ -9,12 +9,11 @@ This is the literate program part for doing Newtonesque algorithms.
 
 ## Export
 
+    self.rootAlgo = _"Algorithm scaffolding";
 
     self.newton = _"newton";
 
-self.sqrt = _"sqrt";
 
-self.root = _"root";
 
 ## Readme
 
@@ -36,40 +35,51 @@ self.root = _"root";
 
 This is the loop part of the algorithms. 
 
-    function (f, start, options) {
+It is a factory function that will accept options to set the control of the algorithm flow. It should return a function that takes in a "next step" function and a start value. The returned function will iterate through until a stopping condition is met. If that condition is not conclusive, then an error property is set on the last object. Otherwise, it is a success an has the answer as a property.
 
-        _":setup"
+By slipping in a {debug:function(res)}, one can inspect the process in the middle and also mutate it somewhat if desired. 
 
-        for ( i = 0; i < n; i += 1 ) {
-            ret.guesses.push(current);
+    function (options) {
 
-            fval = f(current);
-            ret.f.push(fval);
+        options = options || {};
 
-            der = fd(current);
-            ret.fd.push(der);
+        var precision = Num.int(10).ipow(options.precision || self.precision),
+            max = options.maxIterations || self.maxIterations;
+            time = options.time || self.time,
+            debug = options.debug || self.debug;
 
-            if ( der.eq(der.zero()) ) {  //noReciprocal() ) {
-                ret.status = "horizontal tangent line";
-                return ret;
+        return function (step, start) {
+            var current = start, res, temp,
+                t,
+                ret = [];
+
+            while (1) {
+
+                t = process.hrtime();
+                res = step(current);
+                temp = res.time = process.hrtime(t); 
+                ret.push(res);
+                debug(res, ret);
+                if  ( (temp[0] > time[0]) || ( (temp[0] === time[0] ) && ( temp[1] > time[1] )  ) ) {
+                    res.error = "time per step exceeded";
+                    break;
+                }
+                if ( res.precision.mlt(precision) ) {
+                    break;
+                }
+
+                if ( ret.length >= max ) {
+                    res.error = "number of steps exceeded";
+                    break;
+                }
+                current = res.next;
+
             }
 
-            next = current.sub( fval.div(der) );
-
-            if ( current.sub(next).abs().mlt(precision)) { // current.distance(next) < precision) {
-                console.log(current.sub(next).abs().sci().str("dec:50"));
-                ret.status = "found within tolerance";
-                console.log(next.str("dec:100"));
-                ret.answer = next;
-                return ret;
-            }
-            current = next;
-        }
-
-        ret.status = "max iterations exceeded";
-        ret.next = next;
-        return ret;
+            return ret;
+        };
     }
+
 
 
 ## Newton
@@ -84,49 +94,34 @@ The precision is guessed to be the distance of current and next.
 
 To use this method, functions should have a method that generates a derivative. 
 
+!! Distance function should be implemented in math num.
+!!! Need Infinity and NaN implemented? Maybe just use float? 
+
 
     function (f, fd) {
         return function (cur) {
-            fval = f(current);
-            ret.f.push(fval);
+            var fval, der, next;
 
-            der = fd(current);
-            ret.fd.push(der);
+            fval = f(cur);
+            der = fd(cur);
+            
 
             if ( der.eq(der.zero()) ) {  //noReciprocal() ) {
-                ret.status = "horizontal tangent line";
-                return ret;
+                next = Num.float(Infinity);
+            } else {
+                next = cur.sub( fval.div(der) );
             }
 
-            next = current.sub( fval.div(der) );
-
-            if ( current.sub(next).abs().mlt(precision)) { // current.distance(next) < precision) {
-                console.log(current.sub(next).abs().sci().str("dec:50"));
-                ret.status = "found within tolerance";
-                console.log(next.str("dec:100"));
-                ret.answer = next;
-                return ret;
-            }
-            current = next;
+            return {
+                next : next,
+                f : fval,
+                fd : der,
+                precision : cur.sub(next).abs()
+            };
         }
     }
 
     
-[setup]()
-
-    options = options || {};
-
-    console.log(options.precision);
-
-    var fval, der, next, i,
-        current = start,
-        precision = Num.int(10).ipow(options.precision || self.precision),
-        n = options.maxIterations || self.maxIterations,
-        fd = f.derivative(),
-        ret = {guesses : [],
-            f : [],
-            fd : []
-        };
 
 
 
@@ -139,21 +134,33 @@ We want to have a couple of test examples. This will be fairly basic and boring 
     var Num = require('math-numbers');
     var int = Num.int;
     var Finder = require('../index.js');
-    var newton = new Finder().newton;
+    var solver = new Finder();
+    var algo = solver.rootAlgo();
+    var algo2 = solver.rootAlgo({maxIterations:20, precision: -60});
+
     var f = function (x) {
         return x.mul(x).sub(int(2));
     };
-    f.derivative = function () {
-        return function (x) {
+    var derivative = function (x) {
             return int(2).mul(x);
-        };
     };
-    var one = newton(f, Num.rat("1 5/6"), {maxIterations:20, precision: -60});
 
+    var sqnewton = solver.newton(f, derivative);
 
-    one.guesses.forEach(function (el) {
-        console.log(el.str("dec:100"));
+    var one = algo2(sqnewton,  Num.rat("10 5/6") );
+
+    one.forEach(function (el) {
+        var key, temp;
+        for (key in el) {
+            temp = el[key];
+            if (temp instanceof Num) {
+                console.log(key, temp.str("dec:100") ) ;
+            } else {
+                console.log(key, temp);
+            }
+        }
     });
+
 
 [tests](# "js")
 

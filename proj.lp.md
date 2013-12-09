@@ -33,11 +33,11 @@ So this is the actual file for the export of the Newton method and methods.
 
 
     var Num = require('math-numbers');
-    var EventWhen = require('event-when');
 
     var Finder = function (options) {
         options = options || {};
         var self = this;
+        var option;
 
         for (option in options) {
             self[option] = options[option];
@@ -51,7 +51,9 @@ So this is the actual file for the export of the Newton method and methods.
 
     Finder.prototype.precision = -25;
     Finder.prototype.maxIterations = 10;
-    Finder.prototype.evw = new EventWhen();
+    Finder.prototype.time = [1,0];
+    Finder.prototype.debug = function () {};
+
 
     module.exports = Finder;
 
@@ -157,8 +159,7 @@ The requisite npm package file. Use `npm run-script compile` to compile the lite
         "math-numbers" : ">=0.0.7"
       },
       "dependencies" : {
-        "event-when" : "~0.5.1"
-      }
+      },
       "scripts" : { 
         "test" : "node ./test/testrunner.js | grep -v -e ^ok",
         "install": "node install.js"
