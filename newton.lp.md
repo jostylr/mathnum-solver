@@ -4,7 +4,7 @@ This is the literate program part for doing Newtonesque algorithms.
 
 ## Files
 
-*[examples/newton.js](#newton "save: examples|jshint")
+*[examples/root.js](#examples "save: |jshint")
 
 
 ## Export
@@ -35,7 +35,7 @@ This is the literate program part for doing Newtonesque algorithms.
 
 This is the loop part of the algorithms. 
 
-It is a factory function that will accept options to set the control of the algorithm flow. It should return a function that takes in a "next step" function and a start value. The returned function will iterate through until a stopping condition is met. If that condition is not conclusive, then an error property is set on the last object. Otherwise, it is a success an has the answer as a property.
+It is a factory function that will accept options to set the control of the algorithm flow. It should return a function that takes in a "next step" function and a start value. The returned function will iterate through until a stopping condition is met. If that condition is not conclusive, then an error property is set on the last object. Otherwise, it is a success and has the answer as a property.
 
 By slipping in a {debug:function(res)}, one can inspect the process in the middle and also mutate it somewhat if desired. 
 
@@ -56,7 +56,7 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
             while (1) {
 
                 t = process.hrtime();
-                res = step(current);
+                res = step(current, ret);
                 temp = res.time = process.hrtime(t); 
                 ret.push(res);
                 debug(res, ret);
@@ -65,6 +65,7 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
                     break;
                 }
                 if ( res.precision.mlt(precision) ) {
+                    res.answer = res.next;
                     break;
                 }
 
@@ -79,6 +80,42 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
             return ret;
         };
     }
+
+## Reporting
+
+    function (arr) {
+        arr.forEach(function (el) {
+            var key, temp;
+            for (key in el) {
+                temp = el[key];
+                if (temp instanceof Num) {
+                    console.log(key, temp.str("dec:100") ) ;
+                } else {
+                    console.log(key, temp);
+                }
+            }
+        });
+    }
+
+
+## Example
+
+    /*global require, console*/
+
+    var Num = require('math-numbers');
+    var int = Num.int;
+    var Finder = require('../index.js');
+    var solver = new Finder();
+    var algo = solver.rootAlgo();
+    var algo2 = solver.rootAlgo({maxIterations:20, precision: -60});
+
+    var report = _"reporting";
+
+
+    var sqnewton = solver.newton(f, derivative);
+
+    var one = algo2(sqnewton,  Num.rat("10 5/6") );
+
 
 
 
@@ -127,44 +164,37 @@ To use this method, functions should have a method that generates a derivative.
 
 [examples](# "js")
 
-We want to have a couple of test examples. This will be fairly basic and boring so as not to rely on the other function libraries.
+We want to have a couple of test examples. These will be "poly/rational" so as not to rely on the other function libraries.
 
-    /*global require, console*/
 
-    var Num = require('math-numbers');
-    var int = Num.int;
-    var Finder = require('../index.js');
-    var solver = new Finder();
-    var algo = solver.rootAlgo();
-    var algo2 = solver.rootAlgo({maxIterations:20, precision: -60});
+    square root 2 
 
-    var f = function (x) {
+    function (x) {
         return x.mul(x).sub(int(2));
-    };
-    var derivative = function (x) {
-            return int(2).mul(x);
-    };
-
-    var sqnewton = solver.newton(f, derivative);
-
-    var one = algo2(sqnewton,  Num.rat("10 5/6") );
-
-    one.forEach(function (el) {
-        var key, temp;
-        for (key in el) {
-            temp = el[key];
-            if (temp instanceof Num) {
-                console.log(key, temp.str("dec:100") ) ;
-            } else {
-                console.log(key, temp);
-            }
-        }
-    });
-
-
-[tests](# "js")
-
+    }
     
+    function (x) {
+        return int(2).mul(x);
+    }
+    
+    Num.rat("2")
+
+    //
+
+    sine pi
+
+    function (x) {
+        return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120));
+    }
+
+    function (x) {
+        return Num.int(1).sub(x.ipow().div(2)).add(x.ipow(4).div(24));
+    }
+
+    Num.rat("3")
+
+    // 
+
 
 
 
@@ -174,7 +204,46 @@ Use a secant
 
 ## Close Secant
 
-Use numerical derivative instead
+Use numerical derivative instead. So we add cur+del1
+
+    function (f, del1, del2) {
+        if (typeof del1 === "undefined") {
+            del1 = Num.rat("1/10");
+        }
+        if (typeof del1 === "undefined") {
+            del2 = Num.rat("-1/10");
+        }
+        return function (cur, ret) {
+            var fval, der, next, pre;
+
+            if (ret.length) {
+                pre = ret[ret.length-1].precision;
+                h1 = cur.add(pre.mul(del1));
+                h2 = cur.add(pre.mul(del2));
+            }
+
+            fval = f(cur);
+
+            f1 = f(h1);
+            f2 = f(h2);
+            
+            der = f1.sub(f2).div(h1.sub(h2));
+
+            if ( der.eq(der.zero()) ) {  //noReciprocal() ) {
+                next = Num.float(Infinity);
+            } else {
+                next = cur.sub( fval.div(der) );
+            }
+
+            return {
+                next : next,
+                f : fval,
+                fd : der,
+                precision : cur.sub(next).abs()
+            };
+        }
+    }
+
 
 ## Root
 
