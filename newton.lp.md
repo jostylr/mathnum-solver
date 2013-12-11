@@ -44,7 +44,7 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
         options = options || {};
 
         var precision = Num.int(10).ipow(options.precision || self.precision),
-            max = options.maxIterations || self.maxIterations;
+            max = options.maxIterations || self.maxIterations,
             time = options.time || self.time,
             debug = options.debug || self.debug;
 
@@ -98,7 +98,7 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
     }
 
 
-## Example
+## Examples
 
     /*global require, console*/
 
@@ -111,10 +111,16 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
 
     var report = _"reporting";
 
+    var newtexamples = _"newton:examples | matrixify";
 
-    var sqnewton = solver.newton(f, derivative);
-
-    var one = algo2(sqnewton,  Num.rat("10 5/6") );
+    newtexamples.forEach(function (el) {
+        var newt = solver.newton(el[1], el[2]);
+        console.log("Newton", el[0]);
+        var res1 = algo(newt, el[3]);
+        report(res1);
+        var res2 = algo2(newt, el[3]);
+        report(res2);
+    });
 
 
 
@@ -167,7 +173,7 @@ To use this method, functions should have a method that generates a derivative.
 We want to have a couple of test examples. These will be "poly/rational" so as not to rely on the other function libraries.
 
 
-    square root 2 
+    "square root 2"
 
     function (x) {
         return x.mul(x).sub(int(2));
@@ -178,10 +184,8 @@ We want to have a couple of test examples. These will be "poly/rational" so as n
     }
     
     Num.rat("2")
-
-    //
-
-    sine pi
+    ---
+    "sine pi"
 
     function (x) {
         return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120));
@@ -192,8 +196,7 @@ We want to have a couple of test examples. These will be "poly/rational" so as n
     }
 
     Num.rat("3")
-
-    // 
+    
 
 
 
@@ -248,3 +251,25 @@ Use numerical derivative instead. So we add cur+del1
 ## Root
 
 ## Sqrt
+
+## Matrixify
+
+We define a command that takes a list of items separated by returns and makes an array out of them. The strings are trimmed and empty lines are ignored. This should allow for some whitespace formatting. 
+
+    function (code) {
+        var outer = code.split("\n---\n");
+        if (outer[outer.length -1].trim() === "") { // in case sep1 at end
+            outer.pop();
+        }
+        var mat = outer.map(function (el) {
+            return el.trim().split(/\n\n+/);
+        });
+
+        return '[\n' + 
+            mat.map(function (out) {
+                return '[\n' + out.join(',\n') + '\n]';
+            }).join(',\n') + 
+        '\n]';
+    }
+
+[matrixify](#matrixify "define: command | | now")

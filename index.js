@@ -14,8 +14,9 @@ var Finder = function (options) {
         options = options || {};
     
         var precision = Num.int(10).ipow(options.precision || self.precision),
-            max = options.maxIterations || self.maxIterations;
-            time = options.time || self.time;
+            max = options.maxIterations || self.maxIterations,
+            time = options.time || self.time,
+            debug = options.debug || self.debug;
     
         return function (step, start) {
             var current = start, res, temp,
@@ -25,14 +26,16 @@ var Finder = function (options) {
             while (1) {
     
                 t = process.hrtime();
-                res = step(current);
+                res = step(current, ret);
                 temp = res.time = process.hrtime(t); 
                 ret.push(res);
+                debug(res, ret);
                 if  ( (temp[0] > time[0]) || ( (temp[0] === time[0] ) && ( temp[1] > time[1] )  ) ) {
                     res.error = "time per step exceeded";
                     break;
                 }
                 if ( res.precision.mlt(precision) ) {
+                    res.answer = res.next;
                     break;
                 }
     
@@ -78,5 +81,6 @@ var Finder = function (options) {
 Finder.prototype.precision = -25;
 Finder.prototype.maxIterations = 10;
 Finder.prototype.time = [1,0];
+Finder.prototype.debug = function () {};
 
 module.exports = Finder;
