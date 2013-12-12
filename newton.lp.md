@@ -183,19 +183,19 @@ We want to have a couple of test examples. These will be "poly/rational" so as n
         return int(2).mul(x);
     }
     
-    Num.rat("2")
+    Num.rat("2 1/4")
     ---
     "sine pi"
 
     function (x) {
-        return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120));
+        return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120)).sub(x.ipow(7).div(5040));
     }
 
     function (x) {
-        return Num.int(1).sub(x.ipow().div(2)).add(x.ipow(4).div(24));
+        return Num.int(1).sub(x.ipow(3).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
     }
 
-    Num.rat("3")
+    Num.rat("3 1/4")
     
 
 
