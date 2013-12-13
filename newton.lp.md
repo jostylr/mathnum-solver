@@ -118,8 +118,8 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
         console.log("Newton", el[0]);
         var res1 = algo(newt, el[3]);
         report(res1);
-        var res2 = algo2(newt, el[3]);
-        report(res2);
+var res2 = algo2(newt, el[3]);
+report(res2);
     });
 
 
@@ -183,7 +183,7 @@ We want to have a couple of test examples. These will be "poly/rational" so as n
         return int(2).mul(x);
     }
     
-    Num.rat("2 1/4")
+    Num.sci("2.25")
     ---
     "sine pi"
 
@@ -192,7 +192,7 @@ We want to have a couple of test examples. These will be "poly/rational" so as n
     }
 
     function (x) {
-        return Num.int(1).sub(x.ipow(3).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
+        return Num.int(1).sub(x.ipow(2).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
     }
 
     Num.rat("3 1/4")

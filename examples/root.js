@@ -30,7 +30,7 @@ var newtexamples = [
     function (x) {
         return int(2).mul(x);
     },
-    Num.rat("2 1/4")
+    Num.sci("2.25:30")
     ],
     [
     "sine pi",
@@ -38,7 +38,7 @@ var newtexamples = [
         return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120)).sub(x.ipow(7).div(5040));
     },
     function (x) {
-        return Num.int(1).sub(x.ipow(3).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
+        return Num.int(1).sub(x.ipow(2).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
     },
     Num.rat("3 1/4")
     ]
@@ -49,6 +49,4 @@ newtexamples.forEach(function (el) {
     console.log("Newton", el[0]);
     var res1 = algo(newt, el[3]);
     report(res1);
-    var res2 = algo2(newt, el[3]);
-    report(res2);
 });
