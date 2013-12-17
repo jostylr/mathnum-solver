@@ -153,10 +153,10 @@ The requisite npm package file. Use `npm run-script compile` to compile the lite
         "literate-programming" : "~0.7.5",
         "tape" : "=2.3.0",
         "browserify" : "=2.35.4",
-        "math-numbers" : ">=0.0.8"
+        "math-numbers" : ">=0.0.9"
       },
       "peerDependencies":{  
-        "math-numbers" : ">=0.0.8"
+        "math-numbers" : ">=0.0.9"
       },
       "dependencies" : {
       },

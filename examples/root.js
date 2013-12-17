@@ -30,7 +30,7 @@ var newtexamples = [
     function (x) {
         return int(2).mul(x);
     },
-    Num.sci("2.25:30")
+    Num.sci("2.25:100")
     ],
     [
     "sine pi",

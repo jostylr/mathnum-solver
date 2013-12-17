@@ -183,7 +183,7 @@ We want to have a couple of test examples. These will be "poly/rational" so as n
         return int(2).mul(x);
     }
     
-    Num.sci("2.25")
+    Num.sci("2.25:100")
     ---
     "sine pi"
 
