@@ -111,7 +111,9 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
 
     var report = _"reporting";
 
-    var newtexamples = _"newton:examples | matrixify";
+    var examples = _":examples | matrixify";
+
+
 
     newtexamples.forEach(function (el) {
         var newt = solver.newton(el[1], el[2]);
@@ -121,6 +123,37 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
 var res2 = algo2(newt, el[3]);
 report(res2);
     });
+
+
+[examples](# "js")
+
+We want to have a couple of test examples. These will be "poly/rational" so as not to rely on the other function libraries.
+
+
+    "square root 2"
+
+    f: function (x) {
+        return x.mul(x).sub(int(2));
+    }
+    
+    fd: function (x) {
+        return int(2).mul(x);
+    }
+    
+    start: Num.sci("2.25:100")
+    ---
+    "sine pi"
+
+    function (x) {
+        return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120)).sub(x.ipow(7).div(5040));
+    }
+
+    function (x) {
+        return Num.int(1).sub(x.ipow(2).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
+    }
+
+    Num.rat("3 1/4")
+    
 
 
 
@@ -168,39 +201,6 @@ To use this method, functions should have a method that generates a derivative.
 
 
 
-[examples](# "js")
-
-We want to have a couple of test examples. These will be "poly/rational" so as not to rely on the other function libraries.
-
-
-    "square root 2"
-
-    function (x) {
-        return x.mul(x).sub(int(2));
-    }
-    
-    function (x) {
-        return int(2).mul(x);
-    }
-    
-    Num.sci("2.25:100")
-    ---
-    "sine pi"
-
-    function (x) {
-        return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120)).sub(x.ipow(7).div(5040));
-    }
-
-    function (x) {
-        return Num.int(1).sub(x.ipow(2).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
-    }
-
-    Num.rat("3 1/4")
-    
-
-
-
-
 ## Secant
 
 Use a secant 
@@ -217,12 +217,15 @@ Use numerical derivative instead. So we add cur+del1
             del2 = Num.rat("-1/10");
         }
         return function (cur, ret) {
-            var fval, der, next, pre;
+            var fval, der, next, pre, h1, h2;
 
             if (ret.length) {
                 pre = ret[ret.length-1].precision;
                 h1 = cur.add(pre.mul(del1));
                 h2 = cur.add(pre.mul(del2));
+            } else {
+                h1 = cur.add(del1);
+                h2 = cur.add(del2);
             }
 
             fval = f(cur);
