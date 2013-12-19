@@ -130,17 +130,17 @@ report(res2);
 We want to have a couple of test examples. These will be "poly/rational" so as not to rely on the other function libraries.
 
 
-    "square root 2"
-
-    f: function (x) {
-        return x.mul(x).sub(int(2));
+    {
+        msg: "square root 2",
+        f: function (x) {
+            return x.mul(x).sub(int(2));
+        },
+        fd: function (x) {
+            return int(2).mul(x);
+        },
+        del1 : 
+        start: Num.sci("2.25:100")
     }
-    
-    fd: function (x) {
-        return int(2).mul(x);
-    }
-    
-    start: Num.sci("2.25:100")
     ---
     "sine pi"
 
@@ -203,19 +203,23 @@ To use this method, functions should have a method that generates a derivative.
 
 ## Secant
 
-Use a secant 
+Use a secant. This 
 
 ## Close Secant
 
-Use numerical derivative instead. So we add cur+del1
+Use numerical derivative instead. del1 and del2 are the multiplicative factors that will use the current precision levels in determining how close the points should be. 
 
-    function (f, del1, del2) {
+    function (f, del1, del2, initpre) {
         if (typeof del1 === "undefined") {
             del1 = Num.rat("1/10");
         }
-        if (typeof del1 === "undefined") {
+        if (typeof del2 === "undefined") {
             del2 = Num.rat("-1/10");
         }
+        if (typeof initpre === "undefined") {
+            initpre = Num.int("1");
+        }
+
         return function (cur, ret) {
             var fval, der, next, pre, h1, h2;
 
