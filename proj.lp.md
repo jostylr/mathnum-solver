@@ -32,6 +32,8 @@ Saving:
 So this is the actual file for the export of the Newton method and methods.
 
 
+    /*global require, process, module*/
+
     var Num = require('math-numbers');
 
     var Finder = function (options) {
@@ -47,7 +49,7 @@ So this is the actual file for the export of the Newton method and methods.
 
         return this;
 
-    }
+    };
 
     Finder.prototype.precision = -25;
     Finder.prototype.maxIterations = 10;

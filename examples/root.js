@@ -28,19 +28,6 @@ var examples = [{
         del2 : Num.rat("-1/100"),
         start: Num.sci("2.25:100"),
         start2: Num.sci("2.15:100")
-    },
-    {
-        msg : "sine pi",
-        f: function (x) {
-            return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120)).sub(x.ipow(7).div(5040));
-        },
-        fd :  function (x) {
-        return Num.int(1).sub(x.ipow(2).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
-        },
-        del1 : Num.int("1"),
-        del2 : Num.int("0"),
-        start : Num.rat("3 1/4"),
-        start2 : Num.rat("3")
     }];
 
 examples.forEach(function (el) {
@@ -52,3 +39,23 @@ examples.forEach(function (el) {
     var secant = solver.secant(el.f);
     console.log("Secant", answer(algo(secant, [el.start, [el.start2, el.f(el.start2)]]) ) );
 });
+
+var sqrt;
+
+var two = Num.int(2);
+sqrt = solver.sqrt(two);
+console.log("Sqrt 2, 0.5: ", answer(algo(sqrt, two ) ) );
+sqrt = solver.sqrt(two, Num.rat('1/3'));
+console.log("Sqrt 2, 1/3: ", answer(algo(sqrt, two ) ) );
+sqrt = solver.sqrt(two, Num.rat('499/1000'));
+console.log("Sqrt 2, 499/1000: ", answer(algo(sqrt, two ) ) );
+
+var root;
+root = solver.root(two, 3);
+console.log("Cube root 2, 2/3: ", answer(algo(root, two ) ) );
+root = solver.root(two, 3, Num.rat('1/2'));
+console.log("Cube root 2, 1/2: ", answer(algo(root, two ) ) );
+root = solver.root(two, 3, Num.rat('6/10') );
+console.log("Cube root 2, .6: ", answer(algo(root, two ) ) );
+root = solver.root(two, 3, Num.rat('9/10') );
+console.log("Cube root 2, .9: ", answer(algo(root, two ) ) );

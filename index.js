@@ -1,3 +1,5 @@
+/*global require, process, module*/
+
 var Num = require('math-numbers');
 
 var Finder = function (options) {
@@ -73,7 +75,7 @@ var Finder = function (options) {
                     fd : der,
                     precision : cur.sub(next).abs()
                 };
-            }
+            };
         
             ret.answer = function (res) {
                 return res.next;
@@ -155,7 +157,7 @@ var Finder = function (options) {
                     fd : der,
                     precision : cur.sub(next).abs()
                 };
-            }
+            };
         
             ret.answer = function (res) {
                 return res.next;
@@ -164,10 +166,72 @@ var Finder = function (options) {
             return ret;
         
         };
+    
+    self.sqrt = function (M, c) {
+            var sci1 = Num.sci(1);
+            if (typeof c === "undefined") {
+                c = Num.rat("1/2");
+            }
+            var d = Num.int(1).sub(c);
+            var ret = function (x) {
+        
+                var y = M.div(x);
+        
+                var next =  c.mul(x).add(d.mul(y));
+        
+                return {
+                    x : x,
+                    y : y,
+                    next : next,
+                    precision : x.sub(y).abs().mul(sci1)
+                };
+            };
+        
+            ret.answer = function (res) {
+                return res.next;
+            };
+        
+            return ret;
+        };
+    
+    self.root = function (M, n, c) {
+            var sci1 = Num.sci(1), 
+                d, pow;
+            if (typeof n === "number") {
+                n = Num.int(n);
+            }
+            pow = n.sub(Num.int(1));
+            if (typeof c === "undefined") {
+                d = n.inv();
+                c = Num.int(1).sub(d);
+            } else { 
+                d = Num.int(1).sub(c);
+            }
+        
+            var ret = function (x) {
+        
+                var y = M.div(x.ipow(pow));
+        
+                var next =  c.mul(x).add(d.mul(y));
+        
+                return {
+                    x : x,
+                    y : y,
+                    next : next,
+                    precision : x.sub(y).abs().mul(sci1)
+                };
+            };
+        
+            ret.answer = function (res) {
+                return res.next;
+            };
+        
+            return ret;
+        };
 
     return this;
 
-}
+};
 
 Finder.prototype.precision = -25;
 Finder.prototype.maxIterations = 10;

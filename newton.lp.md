@@ -9,6 +9,7 @@ This is the literate program part for doing Newtonesque algorithms.
 
 ## Export
 
+
     self.rootAlgo = _"Algorithm scaffolding";
 
     self.newton = _"newton";
@@ -17,6 +18,9 @@ This is the literate program part for doing Newtonesque algorithms.
 
     self.numNewton = _"Close secant";
 
+    self.sqrt = _"sqrt";
+
+    self.root = _"root";
 
 
 ## Readme
@@ -145,6 +149,26 @@ var report = _"reporting";
         console.log("Secant", answer(algo(secant, [el.start, [el.start2, el.f(el.start2)]]) ) );
     });
 
+    var sqrt;
+
+    var two = Num.int(2);
+    sqrt = solver.sqrt(two);
+    console.log("Sqrt 2, 0.5: ", answer(algo(sqrt, two ) ) );
+    sqrt = solver.sqrt(two, Num.rat('1/3'));
+    console.log("Sqrt 2, 1/3: ", answer(algo(sqrt, two ) ) );
+    sqrt = solver.sqrt(two, Num.rat('499/1000'));
+    console.log("Sqrt 2, 499/1000: ", answer(algo(sqrt, two ) ) );
+
+    var root;
+    root = solver.root(two, 3);
+    console.log("Cube root 2, 2/3: ", answer(algo(root, two ) ) );
+    root = solver.root(two, 3, Num.rat('1/2'));
+    console.log("Cube root 2, 1/2: ", answer(algo(root, two ) ) );
+    root = solver.root(two, 3, Num.rat('6/10') );
+    console.log("Cube root 2, .6: ", answer(algo(root, two ) ) );
+    root = solver.root(two, 3, Num.rat('9/10') );
+    console.log("Cube root 2, .9: ", answer(algo(root, two ) ) );
+
 
 [examples](# "js")
 
@@ -163,7 +187,11 @@ We want to have a couple of test examples. These will be "poly/rational" so as n
         del2 : Num.rat("-1/100"),
         start: Num.sci("2.25:100"),
         start2: Num.sci("2.15:100")
-    },
+    }
+
+[ignore]()
+
+    ,
     {
         msg : "sine pi",
         f: function (x) {
@@ -218,7 +246,7 @@ To use this method, functions should have a method that generates a derivative.
                 fd : der,
                 precision : cur.sub(next).abs()
             };
-        }
+        };
 
         ret.answer = function (res) {
             return res.next;
@@ -316,7 +344,7 @@ Use numerical derivative instead. del1 and del2 are the multiplicative factors t
                 fd : der,
                 precision : cur.sub(next).abs()
             };
-        }
+        };
 
         ret.answer = function (res) {
             return res.next;
@@ -327,11 +355,90 @@ Use numerical derivative instead. del1 and del2 are the multiplicative factors t
     }
 
 
-## Root
-
 ## Sqrt
 
+We implement the square root finding algorithm of classic yore. Given a guess x and a number M whose square root R we want, then y = M/x  is its partner. Notice this is symmetric and that if  x > y > 0,  then x > R > y since  x*y = M = R^2 leading to  x*x > x*y = M > y*y  and so  x > M > y. This also means that x-y really is a bound on the error. 
+
+The algorithm is   (x+y)/2 for the next guess. Seems natural. We, of course, will have a parameter c such that  c*x + (1-c) * y is the next guess. 
+
+    function (M, c) {
+        var sci1 = Num.sci(1);
+        if (typeof c === "undefined") {
+            c = Num.rat("1/2");
+        }
+        var d = Num.int(1).sub(c);
+        var ret = function (x) {
+
+            var y = M.div(x);
+
+            var next =  c.mul(x).add(d.mul(y));
+
+            return {
+                x : x,
+                y : y,
+                next : next,
+                precision : x.sub(y).abs().mul(sci1)
+            };
+        };
+
+        ret.answer = function (res) {
+            return res.next;
+        };
+
+        return ret;
+    }
+
+
+## Root
+
+We implement finding n-th roots. The idea is that if x is our guess, n is the power, and M is the target so that x^n = M is our goal,  then  we define y =  M/x^(n-1) as the partner to x. Note x^(n-1)*y = M by our choice so that if y is close to x, then x is approximately the nth root of M.  
+
+While we could get an iteration by defining a sequence of y's, it would most likely diverge. 
+
+Assume  x > y > 0.  Then multiply by x^(n-1) to get x^n > M = R^n and so x > R. As for R > y, R^n = x^(n-1)*y > y^n.  So R > y.  Thus  x-y is again a level of the precision. 
+
+Calculus tells us that  c*x + d*y  where c+d = 1 and d = 1/n  (so  c = (n-1)/n  ) is the right mix to get great convergence. We do a similar story to the square root, except we also pass in the n. 
+
+    function (M, n, c) {
+        var sci1 = Num.sci(1), 
+            d, pow;
+        if (typeof n === "number") {
+            n = Num.int(n);
+        }
+        pow = n.sub(Num.int(1));
+        if (typeof c === "undefined") {
+            d = n.inv();
+            c = Num.int(1).sub(d);
+        } else { 
+            d = Num.int(1).sub(c);
+        }
+
+        var ret = function (x) {
+
+            var y = M.div(x.ipow(pow));
+
+            var next =  c.mul(x).add(d.mul(y));
+
+            return {
+                x : x,
+                y : y,
+                next : next,
+                precision : x.sub(y).abs().mul(sci1)
+            };
+        };
+
+        ret.answer = function (res) {
+            return res.next;
+        };
+
+        return ret;
+    }
+
+
+
 ## Matrixify
+
+!!! No longer used.
 
 We define a command that takes a list of items separated by returns and makes an array out of them. The strings are trimmed and empty lines are ignored. This should allow for some whitespace formatting. 
 
