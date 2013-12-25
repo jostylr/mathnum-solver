@@ -5,48 +5,50 @@ var int = Num.int;
 var Finder = require('../index.js');
 var solver = new Finder();
 var algo = solver.rootAlgo();
-var algo2 = solver.rootAlgo({maxIterations:20, precision: -60});
+//algo = solver.rootAlgo({maxIterations:20, precision: -60});
 
-var report = function (arr) {
-        arr.forEach(function (el) {
-            var key, temp;
-            for (key in el) {
-                temp = el[key];
-                if (temp instanceof Num) {
-                    console.log(key, temp.str("dec:100") ) ;
-                } else {
-                    console.log(key, temp);
-                }
-            }
-        });
+var answer = function (arr) {
+        var last = arr[arr.length-1];
+        if (last.answer) {
+            return last.answer.str("dec:100")+ "\nPrecision: "+ last.precision.str("dec:3");
+        } else {
+            return last.error + "\n" + last.last.str("dec:100")+ "\nPrecision: "+ last.precision.str("dec:3");
+        } 
     };
 
-var newtexamples = [
-    [
-    "square root 2",
-    function (x) {
-        return x.mul(x).sub(int(2));
+var examples = [{
+        msg: "square root 2",
+        f: function (x) {
+            return x.mul(x).sub(int(2));
+        },
+        fd: function (x) {
+            return int(2).mul(x);
+        },
+        del1 : Num.rat("1/100"),
+        del2 : Num.rat("-1/100"),
+        start: Num.sci("2.25:100"),
+        start2: Num.sci("2.15:100")
     },
-    function (x) {
-        return int(2).mul(x);
-    },
-    Num.sci("2.25:100")
-    ],
-    [
-    "sine pi",
-    function (x) {
-        return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120)).sub(x.ipow(7).div(5040));
-    },
-    function (x) {
+    {
+        msg : "sine pi",
+        f: function (x) {
+            return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120)).sub(x.ipow(7).div(5040));
+        },
+        fd :  function (x) {
         return Num.int(1).sub(x.ipow(2).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
-    },
-    Num.rat("3 1/4")
-    ]
-    ];
+        },
+        del1 : Num.int("1"),
+        del2 : Num.int("0"),
+        start : Num.rat("3 1/4"),
+        start2 : Num.rat("3")
+    }];
 
-newtexamples.forEach(function (el) {
-    var newt = solver.newton(el[1], el[2]);
-    console.log("Newton", el[0]);
-    var res1 = algo(newt, el[3]);
-    report(res1);
+examples.forEach(function (el) {
+    console.log(el.msg);
+    var newt = solver.newton(el.f, el.fd);
+    console.log("Newton", answer(algo(newt, el.start) ) );
+    var numNewton = solver.numNewton(el.f, el.del1, el.del2);
+    console.log("Numerical Derivative Newton", answer(algo(numNewton, el.start) ) );
+    var secant = solver.secant(el.f);
+    console.log("Secant", answer(algo(secant, [el.start, [el.start2, el.f(el.start2)]]) ) );
 });

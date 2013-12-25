@@ -13,6 +13,10 @@ This is the literate program part for doing Newtonesque algorithms.
 
     self.newton = _"newton";
 
+    self.secant = _"secant";
+
+    self.numNewton = _"Close secant";
+
 
 
 ## Readme
@@ -62,15 +66,17 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
                 debug(res, ret);
                 if  ( (temp[0] > time[0]) || ( (temp[0] === time[0] ) && ( temp[1] > time[1] )  ) ) {
                     res.error = "time per step exceeded";
+                    res.last = step.answer(res);
                     break;
                 }
                 if ( res.precision.mlt(precision) ) {
-                    res.answer = res.next;
+                    res.answer = step.answer(res);
                     break;
                 }
 
                 if ( ret.length >= max ) {
                     res.error = "number of steps exceeded";
+                    res.last = step.answer(res);
                     break;
                 }
                 current = res.next;
@@ -97,8 +103,22 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
         });
     }
 
+## Answer
+
+This reports the answer. It figures out whether there was an answer or not.
+
+    function (arr) {
+        var last = arr[arr.length-1];
+        if (last.answer) {
+            return last.answer.str("dec:100")+ "\nPrecision: "+ last.precision.str("dec:3");
+        } else {
+            return last.error + "\n" + last.last.str("dec:100")+ "\nPrecision: "+ last.precision.str("dec:3");
+        } 
+    }
 
 ## Examples
+
+This is a program for the examples. Need some tests too.
 
     /*global require, console*/
 
@@ -107,21 +127,22 @@ By slipping in a {debug:function(res)}, one can inspect the process in the middl
     var Finder = require('../index.js');
     var solver = new Finder();
     var algo = solver.rootAlgo();
-    var algo2 = solver.rootAlgo({maxIterations:20, precision: -60});
+    //algo = solver.rootAlgo({maxIterations:20, precision: -60});
 
-    var report = _"reporting";
+var report = _"reporting";
 
-    var examples = _":examples | matrixify";
+    var answer = _"answer";
 
+    var examples = [_":examples"];
 
-
-    newtexamples.forEach(function (el) {
-        var newt = solver.newton(el[1], el[2]);
-        console.log("Newton", el[0]);
-        var res1 = algo(newt, el[3]);
-        report(res1);
-var res2 = algo2(newt, el[3]);
-report(res2);
+    examples.forEach(function (el) {
+        console.log(el.msg);
+        var newt = solver.newton(el.f, el.fd);
+        console.log("Newton", answer(algo(newt, el.start) ) );
+        var numNewton = solver.numNewton(el.f, el.del1, el.del2);
+        console.log("Numerical Derivative Newton", answer(algo(numNewton, el.start) ) );
+        var secant = solver.secant(el.f);
+        console.log("Secant", answer(algo(secant, [el.start, [el.start2, el.f(el.start2)]]) ) );
     });
 
 
@@ -138,21 +159,24 @@ We want to have a couple of test examples. These will be "poly/rational" so as n
         fd: function (x) {
             return int(2).mul(x);
         },
-        del1 : 
-        start: Num.sci("2.25:100")
-    }
-    ---
-    "sine pi"
-
-    function (x) {
-        return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120)).sub(x.ipow(7).div(5040));
-    }
-
-    function (x) {
+        del1 : Num.rat("1/100"),
+        del2 : Num.rat("-1/100"),
+        start: Num.sci("2.25:100"),
+        start2: Num.sci("2.15:100")
+    },
+    {
+        msg : "sine pi",
+        f: function (x) {
+            return x.sub(x.ipow(3).div(6)).add(x.ipow(5).div(120)).sub(x.ipow(7).div(5040));
+        },
+        fd :  function (x) {
         return Num.int(1).sub(x.ipow(2).div(2)).add(x.ipow(4).div(24)).sub(x.ipow(6).div(720));
+        },
+        del1 : Num.int("1"),
+        del2 : Num.int("0"),
+        start : Num.rat("3 1/4"),
+        start2 : Num.rat("3")
     }
-
-    Num.rat("3 1/4")
     
 
 
@@ -175,7 +199,7 @@ To use this method, functions should have a method that generates a derivative.
 
 
     function (f, fd) {
-        return function (cur) {
+        var ret = function (cur) {
             var fval, der, next;
 
             fval = f(cur);
@@ -195,6 +219,12 @@ To use this method, functions should have a method that generates a derivative.
                 precision : cur.sub(next).abs()
             };
         }
+
+        ret.answer = function (res) {
+            return res.next;
+        };
+
+        return ret;
     }
 
     
@@ -203,11 +233,46 @@ To use this method, functions should have a method that generates a derivative.
 
 ## Secant
 
-Use a secant. This 
+Use a secant. This requires two initial points.
+
+carr is the current array of needed values. It is of the form [x2, [x1, f(x1)] ]
+
+    function (f) {
+        var ret = function (carr) {
+            var x1 = carr[1][0],
+                f1 = carr[1][1], 
+                x2 = carr[0], 
+                f2, x3, slope;
+
+            f2 = f(x2);
+            
+            slope = f2.sub(f1).div(x2.sub(x1));
+            
+
+            if ( slope.eq(slope.zero()) ) {  //noReciprocal() ) {
+                x3 = Num.float(Infinity);
+            } else {
+                x3 = x2.sub( f2.div(slope) );
+            }
+
+            return {
+                next : [x3, [x2, f2]],
+                precision : x3.sub(x2).abs()
+            };
+        };
+
+        ret.answer = function (res) {
+            return res.next[0];
+        };
+
+        return ret;
+    }
+
+
 
 ## Close Secant
 
-Use numerical derivative instead. del1 and del2 are the multiplicative factors that will use the current precision levels in determining how close the points should be. 
+Use numerical derivative instead. del1 and del2 are the multiplicative factors that will use the current precision levels in determining how close the points should be. initpre gives an initial precision, necessary since we scale the difference deltas. 
 
     function (f, del1, del2, initpre) {
         if (typeof del1 === "undefined") {
@@ -220,8 +285,8 @@ Use numerical derivative instead. del1 and del2 are the multiplicative factors t
             initpre = Num.int("1");
         }
 
-        return function (cur, ret) {
-            var fval, der, next, pre, h1, h2;
+        var ret = function (cur, ret) {
+            var fval, der, next, pre, h1, h2, f1, f2;
 
             if (ret.length) {
                 pre = ret[ret.length-1].precision;
@@ -252,6 +317,13 @@ Use numerical derivative instead. del1 and del2 are the multiplicative factors t
                 precision : cur.sub(next).abs()
             };
         }
+
+        ret.answer = function (res) {
+            return res.next;
+        };
+
+        return ret;
+
     }
 
 
